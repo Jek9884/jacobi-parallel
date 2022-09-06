@@ -1,2 +1,2 @@
 # JacobiParallel
-Various parallel implementations of Jaobi method for liear systems solution
+Various parallel implementations of Jaobi method for linear systems solution
