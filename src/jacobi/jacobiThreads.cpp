@@ -1,13 +1,13 @@
 #include "../../include/jacobi.hpp"
 
-void jacobiThrs(Matrix mat, std::vector<float> b, std::vector<float>& sol, int threshold, int nw){
+void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, int nw){
 
-    auto computeRow = [&](std::vector<float> &res, int startIdx, int endIdx){
+    auto computeRow = [&](mv::Vector &res, int startIdx, int endIdx){
 
         for(int i=startIdx; i<endIdx+1; i++){
-            std::vector<float> vec = mat.grid[i];
-            int dim = vec.size();
-            float sigma = 0;
+            mv::Vector vec = mat[i];
+            int dim = (int) vec.size();
+            double sigma = 0;
 
             for(int j=0; j<dim; j++){
                 if(i != j){
@@ -23,7 +23,7 @@ void jacobiThrs(Matrix mat, std::vector<float> b, std::vector<float>& sol, int t
 
     {
         utimer timer(message);
-        Map map(mat.grid.size(), map_mode::Chunk, nw, computeRow);
+        Map map((int) mat.size(), map_mode::Chunk, nw, computeRow);
         map.execute(threshold, sol);
     }
 

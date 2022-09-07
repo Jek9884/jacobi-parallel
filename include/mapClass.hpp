@@ -1,8 +1,9 @@
 #include<functional>
-#include<tuple>
 #include<barrier>
 #include<thread>
-#include "matrix.hpp"
+#include "utils.hpp"
+
+using namespace mv;
 
 enum class map_mode {
     Chunk,
@@ -12,12 +13,12 @@ enum class map_mode {
 class Map{
 
 public:
-    Map(int dim, map_mode mode, int pardegree, std::function<void(std::vector<float>&, int, int)> f);
-    void execute(int nIter, std::vector<float> &xk);
+    Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vector&, int, int)>& f);
+    void execute(int nIter, mv::Vector &xk);
 
 private:
     std::vector<std::tuple<int, int>> idxs;
-    std::function<void(std::vector<float>&, int, int)> f;
+    std::function<void(mv::Vector&, int, int)> f;
     int nw;
     int dim;
     map_mode mode;

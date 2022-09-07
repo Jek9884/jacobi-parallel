@@ -2,6 +2,6 @@
 #include "mapClass.hpp"
 #include <omp.h>
 
-std::vector<float> jacobiSeq(Matrix A, std::vector<float> b, std::vector<float>& sol, int threshold);
-void jacobiThrs(Matrix mat, std::vector<float> b, std::vector<float>& sol, int threshold, int nw);
-std::vector<float> jacobiOpenmp(Matrix A, std::vector<float> b, std::vector<float> sol, int threshold, int nw);
+mv::Vector jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector& sol, int threshold);
+void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, int nw);
+mv::Vector jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector sol, int threshold, int nw);

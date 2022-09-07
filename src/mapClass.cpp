@@ -23,17 +23,17 @@ std::vector<std::tuple<int, int>> Map::generateBlocks(){
     return indexes;
 }
 
-Map::Map(int dim, map_mode mode, int pardegree, std::function<void(std::vector<float>&, int, int)> f){
+Map::Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vector&, int, int)>& f){
     this->dim = dim;
     this->mode = mode;
     this->nw = pardegree;
-    this->f = std::move(f);
+    this->f = f;
     this->idxs = this->generateBlocks();
 }
 
-void Map::execute(int nIter, std::vector<float> &xk){
+void Map::execute(int nIter, mv::Vector &xk){
 
-    std::vector<float> xk1(xk.size());
+    mv::Vector xk1(xk.size());
     auto sync_f = [&](){
         xk = xk1;
     };
