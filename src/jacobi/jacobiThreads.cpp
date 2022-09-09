@@ -6,7 +6,7 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
 
         for(int i=startIdx; i<endIdx+1; i++){
             mv::Vector vec = mat[i];
-            int dim = (int) vec.size();
+            int dim = static_cast<int>(vec.size());
             double sigma = 0;
 
             for(int j=0; j<dim; j++){
@@ -23,7 +23,7 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
 
     {
         utimer timer(message);
-        Map map((int) mat.size(), map_mode::Chunk, nw, computeRow);
+        Map map(static_cast<int>(mat.size()), map_mode::Chunk, nw, computeRow);
         map.execute(threshold, sol);
     }
 

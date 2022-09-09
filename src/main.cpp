@@ -5,17 +5,41 @@
 
 void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
 
+    std::tuple data = mv::generateSystem(dim);
+    mv::Matrix a = std::get<0>(data);
+    mv::Vector b = std::get<1>(data);
+    mv::Vector x = std::get<2>(data);
+    mv::Vector expected = std::get<3>(data);
+
     for (int i = 0; i < nRuns; i++) {
 
-        std::tuple data = mv::generateSystem(dim);
-        mv::Matrix a = std::get<0>(data);
-        mv::Vector b = std::get<1>(data);
-        mv::Vector x = std::get<2>(data);
-        mv::Vector expected_x = std::get<3>(data);
+        x = std::get<2>(data);
+        x = jacobiSeq(a, b, x, threshold);
+        if(mv::equalsVec(x, expected)){
+            std::cout << "true" << std::endl;
+        }
+        else{
+            std::cout << "false" << std::endl;
+        }
 
-        jacobiSeq(a, b, x, threshold);
+
+        x = std::get<2>(data);
         jacobiThrs(a, b, x, threshold, nw);
-        jacobiOpenmp(a, b, x, threshold, nw);
+        if(mv::equalsVec(x, expected)){
+            std::cout << "true" << std::endl;
+        }
+        else{
+            std::cout << "false" << std::endl;
+        }
+
+        x = std::get<2>(data);
+        x = jacobiOpenmp(a, b, x, threshold, nw);
+        if(mv::equalsVec(x, expected)){
+            std::cout << "true" << std::endl;
+        }
+        else{
+            std::cout << "false" << std::endl;
+        }
 
     }
 }

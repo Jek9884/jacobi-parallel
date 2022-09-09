@@ -9,7 +9,7 @@ mv::Vector jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector sol, int threshol
         std::string message = "Jacobi openmp with " + std::to_string(threshold) + " steps";
         utimer timer(message);
 
-        int dim = (int) A.size();
+        int dim = static_cast<int>(A.size());
         for(int k=0; k<threshold; k++){
             #pragma omp parallel for num_threads(nw)
             for(int i=0; i<dim; i++){
@@ -21,6 +21,8 @@ mv::Vector jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector sol, int threshol
                 }
                 res[i] = (1/A[i][i])*(b[i]-sigma);
             }
+
+            sol = res;
         }
     }
 

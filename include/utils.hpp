@@ -62,4 +62,18 @@ namespace mv{
 
     }
 
+    inline bool equalsVec(mv::Vector a, mv::Vector b, double tol = 1e-8){
+
+        bool equals = true;
+        int size = static_cast<int>(a.size());
+
+        for(int i=0;i<size;i++){
+            if(std::abs(a[i]-b[i]) > tol){
+                equals = false;
+            }
+        }
+
+        return equals;
+    }
+
 }
