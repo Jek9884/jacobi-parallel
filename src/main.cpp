@@ -14,7 +14,7 @@ void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
     for (int i = 0; i < nRuns; i++) {
 
         x = std::get<2>(data);
-        x = jacobiSeq(a, b, x, threshold);
+        x = jacobiSeq(a, b, x, mv::checkRes,threshold, 1e-8);
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -33,7 +33,7 @@ void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
         }
 
         x = std::get<2>(data);
-        x = jacobiOpenmp(a, b, x, threshold, nw);
+        x = jacobiOpenmp(a, b, x, mv::checkRes, threshold, 1e-8, nw);
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -41,6 +41,14 @@ void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
             std::cout << "false" << std::endl;
         }
 
+        x = std::get<2>(data);
+        x = jacobiFF(a, b, x, mv::checkRes, threshold, 1e-8, nw);
+        if(mv::equalsVec(x, expected)){
+            std::cout << "true" << std::endl;
+        }
+        else{
+            std::cout << "false" << std::endl;
+        }
     }
 }
 

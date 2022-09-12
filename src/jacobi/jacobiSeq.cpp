@@ -1,13 +1,15 @@
 #include "../../include/jacobi.hpp"
 
-mv::Vector jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, int threshold) {
+auto jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, const std::function<bool(mv::Vector, double)>& stoppingCriteria, int nIter, double tol) -> mv::Vector {
 
-    mv::Vector res(A.size());
+    mv::Vector res(A.size(), 0);
     {
-        std::string message = "Jacobi sequential with " + std::to_string(threshold) + " steps";
+        std::string message = "Jacobi sequential with " + std::to_string(nIter) + " steps";
         utimer timer(message);
         int dim = static_cast<int>(A.size());
-        for (int k = 0; k < threshold; k++) {
+        int iter = 0;
+
+        while(!stoppingCriteria(sol, tol) && (iter < nIter)){
             for (int i = 0; i < dim; i++) {
                 double sigma = 0;
                 for (int j = 0; j < dim; j++) {
@@ -19,7 +21,10 @@ mv::Vector jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, int threshold)
             }
 
             sol = res;
+            iter++;
         }
+
+        std::cout << "Number of effective iterates: " << iter << std::endl;
     }
 
     return res;

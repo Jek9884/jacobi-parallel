@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.16)
 project(JacobiParallel)
 
 include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-O3 -pthread -fopenmp")
+set(CMAKE_CXX_FLAGS "-pthread -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
