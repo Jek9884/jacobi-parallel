@@ -29,10 +29,12 @@ add_executable(JacobiParallel
         include/jacobi.hpp
         include/mapClass.hpp
         include/utils.hpp
+        include/fileHandler.hpp
         src/jacobi/jacobiFF.cpp
         src/jacobi/jacobiOpenMP.cpp
         src/jacobi/jacobiSeq.cpp
         src/jacobi/jacobiThreads.cpp
         src/mapClass.cpp
         src/main.cpp
-        src/utimer.cpp)
+        src/utimer.cpp
+        src/fileHandler.cpp)

@@ -23,7 +23,16 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
 
     {
         utimer timer(message);
+        #if defined(OVERHEAD)
+            std::string sep = ",";
+            std::string header = std::to_string(nw)+sep+std::to_string(threshold)+sep+std::to_string(b.size());
+            writeOnOverheadFile(header, "OverheadTime.csv");
+            utimer* overheadTimer = new utimer("Map creation overhead", true);
+        #endif
         Map map(static_cast<int>(mat.size()), map_mode::Chunk, nw, computeRow);
+        #if defined(OVERHEAD)
+            delete overheadTimer;
+        #endif
         map.execute(threshold, sol);
     }
 

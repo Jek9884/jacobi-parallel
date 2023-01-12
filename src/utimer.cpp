@@ -1,14 +1,17 @@
 #include <iostream>
 #include <chrono>
+#include "../include/fileHandler.hpp"
 
 #define START(timename) auto timename = std::chrono::system_clock::now();
 #define STOP(timename,elapsed)  auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - timename).count();
 
+#define OVERHEAD = 1
 
 class utimer {
     std::chrono::system_clock::time_point start;
     std::chrono::system_clock::time_point stop;
     std::string message;
+    bool overhead;
     using usecs = std::chrono::microseconds;
     using msecs = std::chrono::milliseconds;
 
@@ -17,7 +20,7 @@ private:
 
 public:
 
-    utimer(const std::string m) : message(m),us_elapsed((long *)NULL) {
+    utimer(const std::string m, const bool overhead=false) : message(m), overhead(overhead), us_elapsed((long *)NULL) {
         start = std::chrono::system_clock::now();
     }
 
@@ -33,8 +36,18 @@ public:
         auto musec =
                 std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 
-        std::cout << message << " computed in " << musec << " usec "
-                  << std::endl;
+        #if defined(OVERHEAD)
+            if (overhead) {
+                std::string line = std::to_string(musec) + ';';
+                writeOnOverheadFile(line, "OverheadTime.csv");
+            }
+
+        #endif
+
+        #if !defined(OVERHEAD)
+            std::cout << message << " computed in " << musec << " usec " << std::endl;
+        #endif
+
         if(us_elapsed != NULL)
             (*us_elapsed) = musec;
     }
