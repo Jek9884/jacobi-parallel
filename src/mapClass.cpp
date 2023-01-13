@@ -37,6 +37,7 @@ Map::Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vec
     this->nw = pardegree;
     this->f = f;
     this->idxs = this->generateBlocks();
+    this->converged = false;
 }
 
 /**
@@ -45,12 +46,18 @@ Map::Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vec
  * @param nIter max number of iterations that each thread can perform
  * @param xk solution vector
  */
-void Map::execute(int nIter, mv::Vector &xk){
+void Map::execute(int nIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
+
+    bool converged = false;
+    int iter = 0;
 
     mv::Vector xk1(xk.size());
-    auto sync_f = [&](){
+
+    auto sync_f = [this, &xk, &xk1, &tol, stoppingCriteria, &iter, &nIter](){
         //Update solution vector
         xk = xk1;
+        iter++;
+        this->converged = stoppingCriteria(xk, tol) || (iter >= nIter);
     };
 
     std::barrier syncPoint(this->nw, sync_f);
@@ -67,8 +74,9 @@ void Map::execute(int nIter, mv::Vector &xk){
     #endif
 
     //Lambda function passed to a thread
-    auto executeChunck = [this, &syncPoint, &xk1](int n, int thrIdx){
-        for(int j=0; j<n; j++) {
+    auto executeChunck = [this, &syncPoint, &xk1, converged](int n, int thrIdx){
+        while(!this->converged){
+        //for(int j=0; j<n; j++) {
             int startIdx = std::get<0>(this->idxs[thrIdx]);
             int endIdx = std::get<1>(this->idxs[thrIdx]);
 
@@ -85,6 +93,7 @@ void Map::execute(int nIter, mv::Vector &xk){
                 delete barrierTimer;
             #endif
         }
+
     };
 
     //Perform parallel computation
@@ -95,6 +104,7 @@ void Map::execute(int nIter, mv::Vector &xk){
         thrs[i].join();
     }
 
+    std::cout << "Number of effective iterates: " << iter << std::endl;
 
     delete[] thrs;
 }

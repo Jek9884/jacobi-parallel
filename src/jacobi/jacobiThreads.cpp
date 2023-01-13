@@ -1,6 +1,6 @@
 #include "../../include/jacobi.hpp"
 
-void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, int nw){
+void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, int nw, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
 
     auto computeRow = [&](mv::Vector &res, int startIdx, int endIdx){
 
@@ -34,7 +34,7 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
         delete overheadTimer;
     #endif
 
-    map.execute(threshold, sol);
+    map.execute(threshold, sol, stoppingCriteria, tol);
     
     #if defined(OVERHEAD)
         writeOnFile("\n", RESULTS_FOLDER, OVERHEAD_IN_FILENAME);

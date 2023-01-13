@@ -24,7 +24,7 @@ void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
 
 
         x = std::get<2>(data);
-        jacobiThrs(a, b, x, threshold, nw);
+        jacobiThrs(a, b, x, threshold, nw, mv::checkRes, 1e-8);
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -114,7 +114,7 @@ void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
             utimer* performanceTimer = new utimer("Jacobi thread performance", performance);
         #endif
 
-        jacobiThrs(a, b, x, threshold, nw);
+        jacobiThrs(a, b, x, threshold, nw, mv::checkRes, 1e-8);
 
         #if defined(PERFORMANCE)
             delete performanceTimer;
@@ -229,10 +229,10 @@ int main(int argc, char *argv[]){
     int maxIter = (int) strtol(argv[4], nullptr, 10);
 
     //test_performance_jacobi(nw, n, threshold, iter);
-    //test_sequential_jacobi(n, maxIter, nRuns);
+    test_sequential_jacobi(n, maxIter, nRuns);
     test_thread_jacobi(nw, n, maxIter, nRuns);
-    //test_openmp_jacobi(nw, n, maxIter, nRuns);
-    //test_ff_jacobi(nw, n, maxIter, nRuns);
+    test_openmp_jacobi(nw, n, maxIter, nRuns);
+    test_ff_jacobi(nw, n, maxIter, nRuns);
 
 
     return 0;
