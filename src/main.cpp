@@ -59,9 +59,25 @@ void test_sequential_jacobi(int dim, int maxIter, int nRuns){
     mv::Vector b = std::get<1>(data);
     mv::Vector expected = std::get<3>(data);
 
+    #if defined(PERFORMANCE)
+        std::string sepPer = ",";
+        std::string headerPer = "sequential"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
+        writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+    #endif
+
     for(int i = 0; i <nRuns; i++){
         mv::Vector x = std::get<2>(data);
+        
+        #if defined(PERFORMANCE)
+            utimer* seqTimer = new utimer("Jacobi sequential performance", performance);
+        #endif
+
         jacobiSeq(a, b, x, mv::checkRes, maxIter, 1e-8);
+        
+        #if defined(PERFORMANCE)
+            delete seqTimer;
+        #endif
+        
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -69,6 +85,11 @@ void test_sequential_jacobi(int dim, int maxIter, int nRuns){
             std::cout << "false" << std::endl;
         }
     }
+
+    #if defined(PERFORMANCE)
+        writeOnFile("\n", RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+        extractTime(RESULTS_FOLDER, PERFORMANCE_IN_FILENAME, PERFORMANCE_OUT_FILENAME);
+    #endif
     
 }
 
@@ -119,9 +140,25 @@ void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
     mv::Vector b = std::get<1>(data);
     mv::Vector expected = std::get<3>(data);
 
+    #if defined(PERFORMANCE)
+        std::string sepPer = ",";
+        std::string headerPer = "openmp"+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+    #endif
+
     for(int i=0; i<nRuns; i++){
         mv::Vector x = std::get<2>(data);
+
+        #if defined(PERFORMANCE)
+            utimer* openmpTimer = new utimer("Jacobi openMP performance", performance);
+        #endif
+
         jacobiOpenmp(a, b, x, mv::checkRes, threshold, 1e-8, nw);
+
+        #if defined(PERFORMANCE)
+            delete openmpTimer;
+        #endif
+
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -130,6 +167,10 @@ void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
         }
     }
 
+    #if defined(PERFORMANCE)
+        writeOnFile("\n", RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+        extractTime(RESULTS_FOLDER, PERFORMANCE_IN_FILENAME, PERFORMANCE_OUT_FILENAME);
+    #endif
 }
 
 void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
@@ -139,9 +180,25 @@ void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
     mv::Vector b = std::get<1>(data);
     mv::Vector expected = std::get<3>(data);
 
+    #if defined(PERFORMANCE)
+        std::string sepPer = ",";
+        std::string headerPer = "ff"+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+    #endif
+    
     for(int i=0; i<nRuns; i++){
         mv::Vector x = std::get<2>(data);
+
+        #if defined(PERFORMANCE)
+            utimer* ffTimer = new utimer("Jacobi FastFlow performance", performance);
+        #endif
+
         jacobiFF(a, b, x, mv::checkRes, threshold, 1e-8, nw);
+        
+        #if defined(PERFORMANCE)
+            delete ffTimer;
+        #endif
+        
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -149,6 +206,11 @@ void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
             std::cout << "false" << std::endl;
         }
     }
+
+    #if defined(PERFORMANCE)
+        writeOnFile("\n", RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+        extractTime(RESULTS_FOLDER, PERFORMANCE_IN_FILENAME, PERFORMANCE_OUT_FILENAME);
+    #endif
 
 }
 

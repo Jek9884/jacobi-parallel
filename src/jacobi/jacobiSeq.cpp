@@ -3,29 +3,26 @@
 auto jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, const std::function<bool(mv::Vector, double)>& stoppingCriteria, int nIter, double tol) -> mv::Vector {
 
     mv::Vector res(A.size(), 0);
-    {
-        std::string message = "Jacobi sequential with " + std::to_string(nIter) + " steps";
-        utimer timer(message);
-        int dim = static_cast<int>(A.size());
-        int iter = 0;
+    std::string message = "Jacobi sequential with " + std::to_string(nIter) + " steps";
+    int dim = static_cast<int>(A.size());
+    int iter = 0;
 
-        while(!stoppingCriteria(sol, tol) && (iter < nIter)){
-            for (int i = 0; i < dim; i++) {
-                double sigma = 0;
-                for (int j = 0; j < dim; j++) {
-                    if (i != j) {
-                        sigma = sigma + A[i][j] * sol[j];
-                    }
+    while(!stoppingCriteria(sol, tol) && (iter < nIter)){
+        for (int i = 0; i < dim; i++) {
+            double sigma = 0;
+            for (int j = 0; j < dim; j++) {
+                if (i != j) {
+                    sigma = sigma + A[i][j] * sol[j];
                 }
-                res[i] = (1.0/ A[i][i]) * (b[i] - sigma);
             }
-
-            sol = res;
-            iter++;
+            res[i] = (1.0/ A[i][i]) * (b[i] - sigma);
         }
 
-        std::cout << "Number of effective iterates: " << iter << std::endl;
+        sol = res;
+        iter++;
     }
+
+    std::cout << "Number of effective iterates: " << iter << std::endl;
 
     return res;
 

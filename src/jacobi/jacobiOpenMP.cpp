@@ -4,33 +4,29 @@ auto jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector sol, const std::functio
 
 
     mv::Vector res(A.size());
+    std::string message = "Jacobi openmp with " + std::to_string(nIter) + " steps";
 
-    {
-        std::string message = "Jacobi openmp with " + std::to_string(nIter) + " steps";
-        utimer timer(message);
+    int dim = static_cast<int>(A.size());
 
-        int dim = static_cast<int>(A.size());
+    int iter = 0;
 
-        int iter = 0;
-
-        while(!stoppingCriteria(sol, tol) && (iter < nIter)){
-            #pragma omp parallel for num_threads(nw)
-            for(int i=0; i<dim; i++){
-                double sigma = 0;
-                for(int j=0; j<dim; j++){
-                    if(i != j){
-                        sigma = sigma + A[i][j]*sol[j];
-                    }
+    while(!stoppingCriteria(sol, tol) && (iter < nIter)){
+        #pragma omp parallel for num_threads(nw)
+        for(int i=0; i<dim; i++){
+            double sigma = 0;
+            for(int j=0; j<dim; j++){
+                if(i != j){
+                    sigma = sigma + A[i][j]*sol[j];
                 }
-                res[i] = (1/A[i][i])*(b[i]-sigma);
             }
-
-            sol = res;
-            iter++;
+            res[i] = (1/A[i][i])*(b[i]-sigma);
         }
 
-        std::cout << "Number of effective iterates: " << iter << std::endl;
+        sol = res;
+        iter++;
     }
+
+    std::cout << "Number of effective iterates: " << iter << std::endl;
 
     return res;
 
