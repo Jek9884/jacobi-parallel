@@ -79,9 +79,25 @@ void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
     mv::Vector b = std::get<1>(data);
     mv::Vector expected = std::get<3>(data);
 
+    #if defined(PERFORMANCE)
+        std::string sepPer = ",";
+        std::string headerPer = "thread"+sepPer+std::to_string(nw)+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+    #endif
+
     for(int i=0; i<nRuns; i++){
+
         mv::Vector x = std::get<2>(data);
+
+        #if defined(PERFORMANCE)
+            utimer* performanceTimer = new utimer("Jacobi thread performance", performance);
+        #endif
+
         jacobiThrs(a, b, x, threshold, nw);
+
+        #if defined(PERFORMANCE)
+            delete performanceTimer;
+        #endif
         if(mv::equalsVec(x, expected)){
             std::cout << "true" << std::endl;
         }
@@ -90,6 +106,10 @@ void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
         }
     }
 
+    #if defined(PERFORMANCE)
+        writeOnFile("\n", RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
+        extractTime(RESULTS_FOLDER, PERFORMANCE_IN_FILENAME, PERFORMANCE_OUT_FILENAME);
+    #endif
 }
 
 void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
@@ -129,6 +149,11 @@ void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
             std::cout << "false" << std::endl;
         }
     }
+
+}
+
+void eval_performance(){
+
 
 }
 

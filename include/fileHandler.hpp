@@ -5,5 +5,8 @@
 #include <sstream>
 #include <numeric>
 
-void writeOnOverheadFile(std::string data, std::string filename);
-void extractOverheadTime(std::string inFilename, std::string outFilename);
+#include <sys/stat.h>
+#include <sys/types.h>
+
+void writeOnFile(std::string data, std::string path, std::string filename);
+void extractTime(std::string dirpath, std::string inFilename, std::string outFilename);

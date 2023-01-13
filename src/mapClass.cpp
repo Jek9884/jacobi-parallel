@@ -57,7 +57,7 @@ void Map::execute(int nIter, mv::Vector &xk){
 
     //Compute overhead for thread init
     #if defined(OVERHEAD)
-        utimer* threadTimer = new utimer("Thread init ", true);
+        utimer* threadTimer = new utimer("Thread init ", overhead);
     #endif
     
     auto *thrs = new std::thread[this->nw];
@@ -76,7 +76,7 @@ void Map::execute(int nIter, mv::Vector &xk){
             
             //Compute time passed in a sync point
             #if defined(OVERHEAD)
-                utimer* barrierTimer = new utimer("Barrier time iter " + j, true);
+                utimer* barrierTimer = new utimer("Barrier time iter " + j, overhead);
             #endif
             
             syncPoint.arrive_and_wait();
@@ -97,11 +97,6 @@ void Map::execute(int nIter, mv::Vector &xk){
 
 
     delete[] thrs;
-
-    #if defined(OVERHEAD)
-        writeOnOverheadFile("\n", "OverheadTime.csv");
-        extractOverheadTime("OverheadTime.csv", "ResultsOverhead.csv");
-    #endif
 }
 
 

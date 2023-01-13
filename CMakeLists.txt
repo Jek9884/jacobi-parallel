@@ -30,6 +30,7 @@ add_executable(JacobiParallel
         include/mapClass.hpp
         include/utils.hpp
         include/fileHandler.hpp
+        include/constants.hpp
         src/jacobi/jacobiFF.cpp
         src/jacobi/jacobiOpenMP.cpp
         src/jacobi/jacobiSeq.cpp

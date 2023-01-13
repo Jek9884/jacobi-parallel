@@ -21,19 +21,23 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
 
     std::string message = "Jacobi threads with " + std::to_string(threshold) + " steps";
 
-    {
-        utimer timer(message);
-        #if defined(OVERHEAD)
-            std::string sep = ",";
-            std::string header = std::to_string(nw)+sep+std::to_string(threshold)+sep+std::to_string(b.size());
-            writeOnOverheadFile(header, "OverheadTime.csv");
-            utimer* overheadTimer = new utimer("Map creation overhead", true);
-        #endif
-        Map map(static_cast<int>(mat.size()), map_mode::Chunk, nw, computeRow);
-        #if defined(OVERHEAD)
-            delete overheadTimer;
-        #endif
-        map.execute(threshold, sol);
-    }
+    #if defined(OVERHEAD)
+        std::string sepOver = ",";
+        std::string headerOver = "thread"+sepOver+std::to_string(nw)+sepOver+std::to_string(threshold)+sepOver+std::to_string(b.size());
+        writeOnFile(headerOver, RESULTS_FOLDER, OVERHEAD_IN_FILENAME);
+        utimer* overheadTimer = new utimer("Map creation overhead", overhead);
+    #endif
 
+    Map map(static_cast<int>(mat.size()), map_mode::Chunk, nw, computeRow);
+
+    #if defined(OVERHEAD)
+        delete overheadTimer;
+    #endif
+
+    map.execute(threshold, sol);
+    
+    #if defined(OVERHEAD)
+        writeOnFile("\n", RESULTS_FOLDER, OVERHEAD_IN_FILENAME);
+        extractTime(RESULTS_FOLDER, OVERHEAD_IN_FILENAME, OVERHEAD_OUT_FILENAME);
+    #endif
 }
