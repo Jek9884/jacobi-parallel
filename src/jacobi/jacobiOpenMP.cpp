@@ -1,6 +1,6 @@
 #include "../../include/jacobi.hpp"
 
-auto jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector sol, const std::function<bool(mv::Vector, double)>& stoppingCriteria, int nIter, double tol, int nw) -> mv::Vector{
+auto jacobiOpenmp(mv::Matrix A, mv::Vector b, mv::Vector& sol, const std::function<bool(mv::Vector, double)>& stoppingCriteria, int nIter, double tol, int nw) -> mv::Vector{
 
 
     mv::Vector res(A.size());

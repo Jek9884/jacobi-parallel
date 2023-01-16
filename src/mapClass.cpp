@@ -62,44 +62,37 @@ void Map::execute(int nIter, mv::Vector &xk, const std::function<bool(mv::Vector
 
     std::barrier syncPoint(this->nw, sync_f);
 
-    //Compute overhead for thread init
-    #if defined(OVERHEAD)
-        utimer* threadTimer = new utimer("Thread init ", overhead);
-    #endif
-    
     auto *thrs = new std::thread[this->nw];
-    
-    #if defined(OVERHEAD)
-        delete threadTimer;
-    #endif
 
     //Lambda function passed to a thread
     auto executeChunck = [this, &syncPoint, &xk1, converged](int n, int thrIdx){
         while(!this->converged){
-        //for(int j=0; j<n; j++) {
+            
             int startIdx = std::get<0>(this->idxs[thrIdx]);
             int endIdx = std::get<1>(this->idxs[thrIdx]);
 
             this->f(xk1, startIdx, endIdx);
             
-            //Compute time passed in a sync point
-            #if defined(OVERHEAD)
-                utimer* barrierTimer = new utimer("Barrier time iter " + j, overhead);
-            #endif
-            
             syncPoint.arrive_and_wait();
-            
-            #if defined(OVERHEAD)
-                delete barrierTimer;
-            #endif
+
         }
 
     };
+
+    //Compute overhead for thread init
+    #if defined(OVERHEAD)
+        utimer* threadTimer = new utimer("Thread init ", overhead);
+    #endif
 
     //Perform parallel computation
     for(int j=0; j<this->nw; j++){
         thrs[j] = std::thread(executeChunck, nIter, j);
     }
+
+    #if defined(OVERHEAD)
+        delete threadTimer;
+    #endif
+
     for(int i=0; i<this->nw; i++){
         thrs[i].join();
     }
