@@ -3,61 +3,7 @@
 
 #define assertm(exp, msg) assert(((void)msg, exp))
 
-void test_performance_jacobi(int nw, int dim, int threshold, int nRuns) {
-
-    std::tuple data = mv::generateSystem(dim);
-    mv::Matrix a = std::get<0>(data);
-    mv::Vector b = std::get<1>(data);
-    mv::Vector x = std::get<2>(data);
-    mv::Vector expected = std::get<3>(data);
-
-    for (int i = 0; i < nRuns; i++) {
-
-        x = std::get<2>(data);
-        x = jacobiSeq(a, b, x, mv::checkRes,threshold, 1e-8);
-        if(mv::equalsVec(x, expected)){
-            std::cout << "true" << std::endl;
-        }
-        else{
-            std::cout << "false" << std::endl;
-        }
-
-
-        x = std::get<2>(data);
-        jacobiThrs(a, b, x, threshold, nw, mv::checkRes, 1e-8);
-        if(mv::equalsVec(x, expected)){
-            std::cout << "true" << std::endl;
-        }
-        else{
-            std::cout << "false" << std::endl;
-        }
-
-        x = std::get<2>(data);
-        x = jacobiOpenmp(a, b, x, mv::checkRes, threshold, 1e-8, nw);
-        if(mv::equalsVec(x, expected)){
-            std::cout << "true" << std::endl;
-        }
-        else{
-            std::cout << "false" << std::endl;
-        }
-
-        x = std::get<2>(data);
-        x = jacobiFF(a, b, x, mv::checkRes, threshold, 1e-8, nw);
-        if(mv::equalsVec(x, expected)){
-            std::cout << "true" << std::endl;
-        }
-        else{
-            std::cout << "false" << std::endl;
-        }
-    }
-}
-
-void test_sequential_jacobi(int dim, int maxIter, int nRuns){
-    
-    std::tuple data = mv::generateSystem(dim);
-    mv::Matrix a = std::get<0>(data);
-    mv::Vector b = std::get<1>(data);
-    mv::Vector expected = std::get<3>(data);
+void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -66,7 +12,7 @@ void test_sequential_jacobi(int dim, int maxIter, int nRuns){
     #endif
 
     for(int i = 0; i <nRuns; i++){
-        mv::Vector x = std::get<2>(data);
+        mv::Vector x = sol;
         
         #if defined(PERFORMANCE)
             utimer* seqTimer = new utimer("Jacobi sequential performance", performance);
@@ -93,12 +39,7 @@ void test_sequential_jacobi(int dim, int maxIter, int nRuns){
     
 }
 
-void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
-
-    std::tuple data = mv::generateSystem(dim);
-    mv::Matrix a = std::get<0>(data);
-    mv::Vector b = std::get<1>(data);
-    mv::Vector expected = std::get<3>(data);
+void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -108,7 +49,7 @@ void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
 
     for(int i=0; i<nRuns; i++){
 
-        mv::Vector x = std::get<2>(data);
+        mv::Vector x = sol;
 
         #if defined(PERFORMANCE)
             utimer* performanceTimer = new utimer("Jacobi thread performance", performance);
@@ -133,12 +74,7 @@ void test_thread_jacobi(int nw, int dim, int threshold, int nRuns){
     #endif
 }
 
-void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
-
-    std::tuple data = mv::generateSystem(dim);
-    mv::Matrix a = std::get<0>(data);
-    mv::Vector b = std::get<1>(data);
-    mv::Vector expected = std::get<3>(data);
+void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -147,7 +83,7 @@ void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
     #endif
 
     for(int i=0; i<nRuns; i++){
-        mv::Vector x = std::get<2>(data);
+        mv::Vector x = sol;
 
         #if defined(PERFORMANCE)
             utimer* openmpTimer = new utimer("Jacobi openMP performance", performance);
@@ -173,12 +109,7 @@ void test_openmp_jacobi(int nw, int dim, int threshold, int nRuns){
     #endif
 }
 
-void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
-
-    std::tuple data = mv::generateSystem(dim);
-    mv::Matrix a = std::get<0>(data);
-    mv::Vector b = std::get<1>(data);
-    mv::Vector expected = std::get<3>(data);
+void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -187,7 +118,7 @@ void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
     #endif
     
     for(int i=0; i<nRuns; i++){
-        mv::Vector x = std::get<2>(data);
+        mv::Vector x = sol;
 
         #if defined(PERFORMANCE)
             utimer* ffTimer = new utimer("Jacobi FastFlow performance", performance);
@@ -216,24 +147,87 @@ void test_ff_jacobi(int nw, int dim, int threshold, int nRuns){
 
 void eval_performance(){
 
+    std::vector<int> nws = {1,2,3,4,5,6,7,8};
+    std::vector<int> dim = {10, 100, 1000, 10000, 100000, 1000000};
+    std::vector<int> maxIter = {10000000};
+    std::vector<int> nRuns = {5};
 
+    for(int l=0; l<nRuns.size(); l++){
+        for(int j=0; j<dim.size(); j++){
+
+            std::tuple data = mv::generateSystem(dim[j]);
+            mv::Matrix a = std::get<0>(data);
+            mv::Vector b = std::get<1>(data);
+            mv::Vector sol = std::get<2>(data);
+            mv::Vector expected = std::get<3>(data);
+
+            for(int k=0; k<maxIter.size(); k++){
+
+                mv::Vector x = sol;
+                test_sequential_jacobi(a, b, x, expected, maxIter[k], nRuns[l]);
+
+                for(int i=0; i<nws.size(); i++){
+                    
+                    x = sol;
+                    test_thread_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+                    x = sol;
+                    test_openmp_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+                    x = sol;
+                    test_ff_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+
+                }
+            }
+        }
+    }
 }
 
 int main(int argc, char *argv[]){
 
-    assertm((argc == 5), "Number of workers, matrix dimension, number of runs and max iterations are required");
+    //assertm((argc == 8), "Number of workers, matrix dimension, max number of iterations and number of runs are required");
 
-    int nw = (int) strtol(argv[1], nullptr, 10);
-    int n = (int) strtol(argv[2], nullptr, 10);
-    int nRuns = (int) strtol(argv[3], nullptr, 10);
-    int maxIter = (int) strtol(argv[4], nullptr, 10);
+    if(argc == 9){
+        int nw = (int) strtol(argv[1], nullptr, 10);
+        int dim = (int) strtol(argv[2], nullptr, 10);
+        int maxIter = (int) strtol(argv[3], nullptr, 10);
+        int nRuns = (int) strtol(argv[4], nullptr, 10);
+        int seqRun = (int) strtol(argv[5], nullptr, 10);
+        int thrRun = (int) strtol(argv[6], nullptr, 10);
+        int openmpRun = (int) strtol(argv[7], nullptr, 10);
+        int ffRun = (int) strtol(argv[8], nullptr, 10);
 
-    //test_performance_jacobi(nw, n, threshold, iter);
-    test_sequential_jacobi(n, maxIter, nRuns);
-    test_thread_jacobi(nw, n, maxIter, nRuns);
-    test_openmp_jacobi(nw, n, maxIter, nRuns);
-    test_ff_jacobi(nw, n, maxIter, nRuns);
+        std::tuple data = mv::generateSystem(dim);
+        mv::Matrix a = std::get<0>(data);
+        mv::Vector b = std::get<1>(data);
+        mv::Vector sol = std::get<2>(data);
+        mv::Vector expected = std::get<3>(data);
 
+        if(seqRun == 1){
+            mv::Vector x = sol;
+            printf("Sequential\n");
+            test_sequential_jacobi(a, b, x, expected, maxIter, nRuns);
+        }
+
+        if(thrRun == 1){
+            mv::Vector x = sol;
+            printf("Thread\n");
+            test_thread_jacobi(a, b, x, expected, nw, maxIter, nRuns);  
+        }
+
+        if(openmpRun == 1){
+            mv::Vector x = sol;
+            printf("OpenMP\n");
+            test_openmp_jacobi(a, b, x, expected, nw, maxIter, nRuns);
+        }
+
+        if(ffRun == 1){
+            mv::Vector x = sol;
+            printf("Fast Flow\n");
+            test_ff_jacobi(a, b, x, expected, nw, maxIter, nRuns);
+        }
+    }
+    else if(argc == 1){
+        eval_performance();
+    }
 
     return 0;
 }
