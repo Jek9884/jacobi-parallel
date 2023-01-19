@@ -56,10 +56,12 @@ long parseLine(std::string line){
     std::stringstream ss(line);
     std::string elem;
     long sum = 0;
+    int count = 0;
     std::getline(ss, elem, ';');
     while(std::getline(ss, elem, ';')){
         sum += std::stol(elem);
+        count++;
     }
 
-    return sum;
+    return sum/count;
 }
