@@ -148,8 +148,8 @@ void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expec
 void eval_performance(){
 
     std::vector<int> nws = {1,2,3,4,5,6,7,8};
-    std::vector<int> dim = {10, 100, 1000, 10000, 100000, 1000000};
-    std::vector<int> maxIter = {10000000};
+    std::vector<int> dim = {128, 256, 512, 1024, 2048, 4096, 8192};
+    std::vector<int> maxIter = {100000};
     std::vector<int> nRuns = {5};
 
     for(int l=0; l<nRuns.size(); l++){
@@ -160,20 +160,24 @@ void eval_performance(){
             mv::Vector b = std::get<1>(data);
             mv::Vector sol = std::get<2>(data);
             mv::Vector expected = std::get<3>(data);
+            int maxIt = 1000;
 
             for(int k=0; k<maxIter.size(); k++){
 
                 mv::Vector x = sol;
-                test_sequential_jacobi(a, b, x, expected, maxIter[k], nRuns[l]);
+                if(dim[j] <= 2048){
+                    maxIt = maxIter[k];
+                }
+                test_sequential_jacobi(a, b, x, expected, maxIt, nRuns[l]);
 
                 for(int i=0; i<nws.size(); i++){
                     
                     x = sol;
-                    test_thread_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+                    test_thread_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
                     x = sol;
-                    test_openmp_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+                    test_openmp_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
                     x = sol;
-                    test_ff_jacobi(a, b, x, expected, nws[i], maxIter[k], nRuns[l]);
+                    test_ff_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
 
                 }
             }
