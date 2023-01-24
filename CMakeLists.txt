@@ -5,7 +5,7 @@ include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-pthread -fopenmp")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE -O3)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
@@ -39,3 +39,5 @@ add_executable(JacobiParallel
         src/main.cpp
         src/utimer.cpp
         src/fileHandler.cpp)
+
+target_link_libraries(JacobiParallel PUBLIC Threads::Threads  OpenMP::OpenMP_CXX)

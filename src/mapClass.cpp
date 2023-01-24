@@ -10,7 +10,7 @@ std::vector<std::tuple<int, int>> Map::generateBlocks(){
     int n = this->dim;
     std::vector<std::tuple<int, int>> indexes(this->nw);
 
-    if(this->mode == map_mode::Chunk){
+    if(this->mode == mapMode::Chunk){
         int j=0;
         int block_size = (n % this->nw != 0) ? ceil(n/this->nw) : n/this->nw;
         for(int i=0; i<this->nw; i++){
@@ -31,10 +31,10 @@ std::vector<std::tuple<int, int>> Map::generateBlocks(){
 /**
  * @brief Map object constructor
  */
-Map::Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vector&, int, int)>& f){
+Map::Map(int dim, mapMode mode, int nw, const std::function<void(mv::Vector&, int, int)>& f){
     this->dim = dim;
     this->mode = mode;
-    this->nw = pardegree;
+    this->nw = nw;
     this->f = f;
     this->idxs = this->generateBlocks();
     this->converged = false;
@@ -46,18 +46,18 @@ Map::Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vec
  * @param nIter max number of iterations that each thread can perform
  * @param xk solution vector
  */
-void Map::execute(int nIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
+void Map::execute(int maxIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
 
     bool converged = false;
     int iter = 0;
 
     mv::Vector xk1(xk.size());
 
-    auto sync_f = [this, &xk, &xk1, &tol, stoppingCriteria, &iter, &nIter](){
+    auto sync_f = [this, &xk, &xk1, &tol, stoppingCriteria, &iter, &maxIter](){
         //Update solution vector
         xk = xk1;
         iter++;
-        this->converged = stoppingCriteria(xk, tol) || (iter >= nIter);
+        this->converged = stoppingCriteria(xk, tol) || (iter >= maxIter);
     };
 
     std::barrier syncPoint(this->nw, sync_f);
@@ -86,7 +86,7 @@ void Map::execute(int nIter, mv::Vector &xk, const std::function<bool(mv::Vector
 
     //Perform parallel computation
     for(int j=0; j<this->nw; j++){
-        thrs[j] = std::thread(executeChunck, nIter, j);
+        thrs[j] = std::thread(executeChunck, maxIter, j);
     }
 
     #if defined(OVERHEAD)

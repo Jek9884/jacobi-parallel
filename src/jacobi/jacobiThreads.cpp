@@ -1,11 +1,11 @@
 #include "../../include/jacobi.hpp"
 
-void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, int nw, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
+void jacobiThrs(mv::Matrix A, mv::Vector b, mv::Vector& sol, int maxIter,  const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol, int nw){
 
     auto computeRow = [&](mv::Vector &res, int startIdx, int endIdx){
 
         for(int i=startIdx; i<endIdx+1; i++){
-            mv::Vector vec = mat[i];
+            mv::Vector vec = A[i];
             int dim = static_cast<int>(vec.size());
             double sigma = 0;
 
@@ -19,7 +19,7 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
 
     };
 
-    std::string message = "Jacobi threads with " + std::to_string(threshold) + " steps";
+    std::string message = "Jacobi threads with " + std::to_string(maxIter) + " steps";
 
     #if defined(OVERHEAD)
         std::string sepOver = ",";
@@ -28,13 +28,13 @@ void jacobiThrs(mv::Matrix mat, mv::Vector b, mv::Vector& sol, int threshold, in
         utimer* overheadTimer = new utimer("Map creation overhead", overhead);
     #endif
 
-    Map map(static_cast<int>(mat.size()), map_mode::Chunk, nw, computeRow);
+    Map map(static_cast<int>(A.size()), mapMode::Chunk, nw, computeRow);
 
     #if defined(OVERHEAD)
         delete overheadTimer;
     #endif
 
-    map.execute(threshold, sol, stoppingCriteria, tol);
+    map.execute(maxIter, sol, stoppingCriteria, tol);
     
     #if defined(OVERHEAD)
         writeOnFile("\n", RESULTS_FOLDER, OVERHEAD_IN_FILENAME);

@@ -1,13 +1,13 @@
 #include "../../include/jacobi.hpp"
 
-auto jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, const std::function<bool(mv::Vector, double)>& stoppingCriteria, int nIter, double tol) -> mv::Vector {
+auto jacobiSeq(mv::Matrix A, mv::Vector b, mv::Vector &sol, int maxIter, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol) -> mv::Vector {
 
     mv::Vector res(A.size(), 0);
-    std::string message = "Jacobi sequential with " + std::to_string(nIter) + " steps";
+    std::string message = "Jacobi sequential with " + std::to_string(maxIter) + " steps";
     int dim = static_cast<int>(A.size());
     int iter = 0;
 
-    while(!stoppingCriteria(sol, tol) && (iter < nIter)){
+    while(!stoppingCriteria(sol, tol) && (iter < maxIter)){
         for (int i = 0; i < dim; i++) {
             double sigma = 0;
             for (int j = 0; j < dim; j++) {

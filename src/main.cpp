@@ -18,7 +18,7 @@ void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vect
             utimer* seqTimer = new utimer("Jacobi sequential performance", performance);
         #endif
 
-        jacobiSeq(a, b, x, mv::checkRes, maxIter, 1e-8);
+        jacobiSeq(a, b, x, maxIter, mv::checkRes, 1e-8);
         
         #if defined(PERFORMANCE)
             delete seqTimer;
@@ -39,11 +39,11 @@ void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vect
     
 }
 
-void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
+void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "thread"+sepPer+std::to_string(nw)+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "thread"+sepPer+std::to_string(nw)+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
 
@@ -55,7 +55,7 @@ void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
             utimer* performanceTimer = new utimer("Jacobi thread performance", performance);
         #endif
 
-        jacobiThrs(a, b, x, threshold, nw, mv::checkRes, 1e-8);
+        jacobiThrs(a, b, x, maxIter, mv::checkRes, 1e-8, nw);
 
         #if defined(PERFORMANCE)
             delete performanceTimer;
@@ -74,11 +74,11 @@ void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
     #endif
 }
 
-void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
+void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "openmp"+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "openmp"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
 
@@ -89,7 +89,7 @@ void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
             utimer* openmpTimer = new utimer("Jacobi openMP performance", performance);
         #endif
 
-        jacobiOpenmp(a, b, x, mv::checkRes, threshold, 1e-8, nw);
+        jacobiOpenmp(a, b, x, maxIter, mv::checkRes, 1e-8, nw);
 
         #if defined(PERFORMANCE)
             delete openmpTimer;
@@ -109,11 +109,11 @@ void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
     #endif
 }
 
-void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int threshold, int nRuns){
+void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "ff"+sepPer+std::to_string(threshold)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "ff"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
     
@@ -124,7 +124,7 @@ void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expec
             utimer* ffTimer = new utimer("Jacobi FastFlow performance", performance);
         #endif
 
-        jacobiFF(a, b, x, mv::checkRes, threshold, 1e-8, nw);
+        jacobiFF(a, b, x, maxIter, mv::checkRes, 1e-8, nw);
         
         #if defined(PERFORMANCE)
             delete ffTimer;
@@ -165,7 +165,7 @@ void eval_performance(){
             for(int k=0; k<maxIter.size(); k++){
 
                 mv::Vector x = sol;
-                if(dim[j] <= 2048){
+                if(dim[j] < 1024){
                     maxIt = maxIter[k];
                 }
                 test_sequential_jacobi(a, b, x, expected, maxIt, nRuns[l]);

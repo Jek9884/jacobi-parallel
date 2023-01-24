@@ -5,7 +5,7 @@
 
 using namespace mv;
 
-enum class map_mode {
+enum class mapMode {
     Chunk,
     Cyclic
 };
@@ -13,15 +13,15 @@ enum class map_mode {
 class Map{
 
 public:
-    Map(int dim, map_mode mode, int pardegree, const std::function<void(mv::Vector&, int, int)>& f);
-    void execute(int nIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol);
+    Map(int dim, mapMode mode, int nw, const std::function<void(mv::Vector&, int, int)>& f);
+    void execute(int maxIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol);
 
 private:
     std::vector<std::tuple<int, int>> idxs;
     std::function<void(mv::Vector&, int, int)> f;
     int nw;
     int dim;
-    map_mode mode;
+    mapMode mode;
     std::vector<std::tuple<int, int>> generateBlocks();
     bool converged;
 };
