@@ -46,9 +46,9 @@ public:
             }
         #endif
 
-        #if !defined(OVERHEAD) && !defined(PERFORMANCE)
+        //#if defined(PRINT)
             std::cout << message << " computed in " << musec << " usec " << std::endl;
-        #endif
+        //#endif
 
         if(us_elapsed != NULL)
             (*us_elapsed) = musec;

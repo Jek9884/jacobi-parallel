@@ -2,6 +2,8 @@
 
 //#define OVERHEAD
 #define PERFORMANCE
+#define PRINT
+
 enum timerType{performance, overhead};
 
 const std::string OVERHEAD_IN_FILENAME = "OverheadTime.csv";

@@ -23,7 +23,7 @@ void jacobiThrs(mv::Matrix A, mv::Vector b, mv::Vector& sol, int maxIter,  const
 
     #if defined(OVERHEAD)
         std::string sepOver = ",";
-        std::string headerOver = "thread"+sepOver+std::to_string(nw)+sepOver+std::to_string(threshold)+sepOver+std::to_string(b.size())+";";
+        std::string headerOver = "thread"+sepOver+std::to_string(nw)+sepOver+std::to_string(maxIter)+sepOver+std::to_string(b.size())+";";
         writeOnFile(headerOver, RESULTS_FOLDER, OVERHEAD_IN_FILENAME);
         utimer* overheadTimer = new utimer("Map creation overhead", overhead);
     #endif
