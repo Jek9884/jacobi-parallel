@@ -7,7 +7,7 @@ void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vect
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "sequential"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "sequential"+sepPer+"1"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
 
@@ -78,7 +78,7 @@ void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "openmp"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "openmp"+sepPer+std::to_string(nw)+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
 
@@ -113,7 +113,7 @@ void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expec
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
-        std::string headerPer = "ff"+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
+        std::string headerPer = "ff"+sepPer+std::to_string(nw)+sepPer+std::to_string(maxIter)+sepPer+std::to_string(b.size())+";";
         writeOnFile(headerPer, RESULTS_FOLDER, PERFORMANCE_IN_FILENAME);
     #endif
     
@@ -145,10 +145,10 @@ void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expec
 
 }
 
-void eval_performance(){
+void eval_performance(int mode){
 
-    std::vector<int> nws = {1,2,3,4,5,6,7,8};
-    std::vector<int> dim = {128, 256, 512, 1024, 2048, 4096, 8192};
+    std::vector<int> nws = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+    std::vector<int> dim = {128,256,512,1024,2048,4096,8192};
     std::vector<int> maxIter = {100000};
     std::vector<int> nRuns = {5};
 
@@ -168,17 +168,22 @@ void eval_performance(){
                 if(dim[j] < 1024){
                     maxIt = maxIter[k];
                 }
-                test_sequential_jacobi(a, b, x, expected, maxIt, nRuns[l]);
+		
+		if(mode == 0){
+	        	test_sequential_jacobi(a, b, x, expected, maxIt, nRuns[l]);
+		}
 
                 for(int i=0; i<nws.size(); i++){
                     
                     x = sol;
                     test_thread_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
-                    x = sol;
-                    test_openmp_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
-                    x = sol;
-                    test_ff_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
 
+		    if(mode == 0){
+             	       x = sol;
+	               test_openmp_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
+                       x = sol;
+                       test_ff_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
+		    }
                 }
             }
         }
@@ -229,8 +234,9 @@ int main(int argc, char *argv[]){
             test_ff_jacobi(a, b, x, expected, nw, maxIter, nRuns);
         }
     }
-    else if(argc == 1){
-        eval_performance();
+    else if(argc == 2){
+	int mode = (int) strtol(argv[1], nullptr, 10);
+        eval_performance(mode);
     }
 
     return 0;
