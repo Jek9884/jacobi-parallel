@@ -41,10 +41,19 @@ Map::Map(int dim, mapMode mode, int nw, const std::function<void(mv::Vector&, in
 }
 
 /**
+ * @brief 
+ * 
+ * @param nIter 
+ * @param xk 
+ */
+
+/**
  * @brief Perform Map computation 
  * 
- * @param nIter max number of iterations that each thread can perform
+ * @param maxIter max number of iterations that each thread can perform 
  * @param xk solution vector
+ * @param stoppingCriteria to stop the iterative process
+ * @param tol to use to check the equality between real solution vector and the computed solution vector
  */
 void Map::execute(int maxIter, mv::Vector &xk, const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol){
 

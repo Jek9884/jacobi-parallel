@@ -1,7 +1,33 @@
 #include "../include/fileHandler.hpp"
 
-long parseLine(std::string line);
+/**
+ * @brief Parse a line of the file csv of results and returns the average value
+ * 
+ * @param line to parse
+ * @return long average of the values
+ */
+long parseLine(std::string line){
 
+    std::stringstream ss(line);
+    std::string elem;
+    long sum = 0;
+    int count = 0;
+    std::getline(ss, elem, ';');
+    while(std::getline(ss, elem, ';')){
+        sum += std::stol(elem);
+        count++;
+    }
+
+    return sum/count;
+}
+
+/**
+ * @brief Write on a file the data passed
+ * 
+ * @param data to save
+ * @param dirpath to the directory where to save the file
+ * @param filename of the file to save
+ */
 void writeOnFile(std::string data, std::string dirpath, std::string filename){
 
     //Check if the folder already exist otherwise create the folder
@@ -23,6 +49,13 @@ void writeOnFile(std::string data, std::string dirpath, std::string filename){
 
 }
 
+/**
+ * @brief Extract results from the csv file of results and aggregate them
+ * 
+ * @param dirpath to the directory where to read and save the file
+ * @param inFilename of the file where to read
+ * @param outFilename of the file where to write
+ */
 void extractTime(std::string dirpath, std::string inFilename, std::string outFilename){
 
     std::string inpath = dirpath + "/" + inFilename;
@@ -49,19 +82,4 @@ void extractTime(std::string dirpath, std::string inFilename, std::string outFil
     
     inFile.close();
     
-}
-
-long parseLine(std::string line){
-
-    std::stringstream ss(line);
-    std::string elem;
-    long sum = 0;
-    int count = 0;
-    std::getline(ss, elem, ';');
-    while(std::getline(ss, elem, ';')){
-        sum += std::stol(elem);
-        count++;
-    }
-
-    return sum/count;
 }

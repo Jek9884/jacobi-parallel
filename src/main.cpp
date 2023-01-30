@@ -3,7 +3,9 @@
 
 #define assertm(exp, msg) assert(((void)msg, exp))
 
-void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int maxIter, int nRuns){
+
+//Test sequential implementation of the Jacobi method
+void testSequentialJacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -39,7 +41,8 @@ void test_sequential_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vect
     
 }
 
-void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
+//Test C++ threads implementation of the Jacobi method
+void testThreadJacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -74,7 +77,8 @@ void test_thread_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
     #endif
 }
 
-void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
+//Test OpenMP implementation of the Jacobi method
+void testOpenmpJacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -109,7 +113,8 @@ void test_openmp_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector e
     #endif
 }
 
-void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
+//Test FastFlow implementation of the Jacobi method
+void testFFJacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expected, int nw, int maxIter, int nRuns){
 
     #if defined(PERFORMANCE)
         std::string sepPer = ",";
@@ -145,7 +150,8 @@ void test_ff_jacobi(mv::Matrix a, mv::Vector b, mv::Vector sol, mv::Vector expec
 
 }
 
-void eval_performance(int mode){
+//Perform tests on different combination of number of workers and matrix dimensions
+void evalPerformance(int mode){
 
     std::vector<int> nws = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
     std::vector<int> dim = {128,256,512,1024,2048,4096,8192};
@@ -169,31 +175,78 @@ void eval_performance(int mode){
                     maxIt = maxIter[k];
                 }
 		
-		if(mode == 0){
-	        	test_sequential_jacobi(a, b, x, expected, maxIt, nRuns[l]);
-		}
+                if(mode == 0){
+                        testSequentialJacobi(a, b, x, expected, maxIt, nRuns[l]);
+                }
 
                 for(int i=0; i<nws.size(); i++){
                     
                     x = sol;
-                    test_thread_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
+                    testThreadJacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
 
-		    if(mode == 0){
-             	       x = sol;
-	               test_openmp_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
-                       x = sol;
-                       test_ff_jacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
-		    }
+                    if(mode == 0){
+                        x = sol;
+                        testOpenmpJacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
+                        x = sol;
+                        testFFJacobi(a, b, x, expected, nws[i], maxIt, nRuns[l]);
+                    }
                 }
             }
         }
     }
 }
 
+//Evaluate the time spent with the serial fraction
+void evalSerialFraction(){
+
+    std::vector<int> dim = {128,256,512,1024,2048,4096,8192, 16384};
+    int nRuns = 5;
+    int iter = 0;
+    int maxIter = 10000;
+
+    for(int i=0; i<nRuns; i++){
+        for(int j=0; j<dim.size(); j++){
+
+            std::tuple data = mv::generateSystem(dim[j]);
+            mv::Vector sol = std::get<2>(data);
+            mv::Vector expected = std::get<3>(data);
+            {
+                utimer timer("Serial time ");
+                sol = expected;
+                (mv::checkRes(sol, 1e-8) && (iter < maxIter));
+                iter++;
+            }
+        }
+    }
+}
+
+//Evaluate the time spent for the threads initialization
+void evalThreadOverhead(){
+
+    //Dummy lambda function passed to a thread
+    auto executeThr = [](int nIter){
+        int x=0;
+        for(int i=0; i<nIter; i++){
+            x++;
+        }
+    };
+    
+    std::vector<int> nws = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+    for(int i=0; i<nws.size(); i++){
+        {
+            utimer timer("Thread init time ");
+            auto *thrs = new std::thread[nws[i]];
+            for(int j=0; j<nws[i]; j++){
+                thrs[j] = std::thread(executeThr, 100);
+            }   
+        }
+
+    }
+}
+
 int main(int argc, char *argv[]){
 
-    //assertm((argc == 8), "Number of workers, matrix dimension, max number of iterations and number of runs are required");
-
+    assertm((argc == 9 || argc == 2 ), "Missing parameters");
     if(argc == 9){
         int nw = (int) strtol(argv[1], nullptr, 10);
         int dim = (int) strtol(argv[2], nullptr, 10);
@@ -213,31 +266,40 @@ int main(int argc, char *argv[]){
         if(seqRun == 1){
             mv::Vector x = sol;
             printf("Sequential\n");
-            test_sequential_jacobi(a, b, x, expected, maxIter, nRuns);
+            testSequentialJacobi(a, b, x, expected, maxIter, nRuns);
         }
 
         if(thrRun == 1){
             mv::Vector x = sol;
             printf("Thread\n");
-            test_thread_jacobi(a, b, x, expected, nw, maxIter, nRuns);  
+            testThreadJacobi(a, b, x, expected, nw, maxIter, nRuns);  
         }
 
         if(openmpRun == 1){
             mv::Vector x = sol;
             printf("OpenMP\n");
-            test_openmp_jacobi(a, b, x, expected, nw, maxIter, nRuns);
+            testOpenmpJacobi(a, b, x, expected, nw, maxIter, nRuns);
         }
 
         if(ffRun == 1){
             mv::Vector x = sol;
             printf("Fast Flow\n");
-            test_ff_jacobi(a, b, x, expected, nw, maxIter, nRuns);
+            testFFJacobi(a, b, x, expected, nw, maxIter, nRuns);
         }
     }
     else if(argc == 2){
 	int mode = (int) strtol(argv[1], nullptr, 10);
-        eval_performance(mode);
+        if(mode < 2){
+            evalPerformance(mode);    
+        }
+        else if(mode == 2){
+            evalSerialFraction();
+        }
+        else{
+            evalThreadOverhead();
+        }
+        
     }
-
+    
     return 0;
 }

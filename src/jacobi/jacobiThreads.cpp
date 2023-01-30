@@ -1,5 +1,16 @@
 #include "../../include/jacobi.hpp"
 
+/**
+ * @brief Compute Jacobi method with the C++ threads implementation
+ * 
+ * @param A matrix
+ * @param b vector 
+ * @param sol solution vector
+ * @param maxIter maximum nuber of iterations
+ * @param stoppingCriteria stopping criteria to use
+ * @param tol tolerance to check equality between computed and real solution
+ * @param nw number of workers to use
+ */
 void jacobiThrs(mv::Matrix A, mv::Vector b, mv::Vector& sol, int maxIter,  const std::function<bool(mv::Vector, double)>& stoppingCriteria, double tol, int nw){
 
     auto computeRow = [&](mv::Vector &res, int startIdx, int endIdx){
